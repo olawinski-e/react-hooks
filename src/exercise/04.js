@@ -2,12 +2,12 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-import {useLocalStorageState} from '../utils'
+import {useLocalStorageState} from '../utils/getLocalStorage'
 
-function Board({squares, onClick}) {
+function Board({onClick, squares, winner}) {
   function renderSquare(i) {
     return (
-      <button className="square" onClick={() => onClick(i)}>
+      <button className="square" onClick={() => onClick(i)} disabled={winner}>
         {squares[i]}
       </button>
     )
@@ -48,15 +48,16 @@ function Game() {
   const winner = calculateWinner(currentSquares)
   const status = calculateStatus(winner, currentSquares, nextValue)
 
-  function selectSquare(square) {
-    if (winner || currentSquares[square]) {
+  function selectSquare(squareIndex) {
+    if (winner || currentSquares[squareIndex]) {
       return
     }
-    const newHistory = history.slice(0, currentStep + 1)
 
-    const squaresCopy = [...currentSquares]
-    squaresCopy[square] = nextValue
-    setHistory([...newHistory, squaresCopy])
+    const newHistory = history.slice(0, currentStep + 1)
+    const squares = [...currentSquares]
+
+    squares[squareIndex] = nextValue
+    setHistory([...newHistory, squares])
     setCurrentStep(newHistory.length)
   }
 
@@ -66,17 +67,15 @@ function Game() {
   }
 
   const moves = history.map((_, index) => {
-    const text = index ? `Go to move #${index}` : 'Go to game start'
     const isCurrentStep = index === currentStep
+    const description =
+      index === 0 ? `Go to game start ` : `Go to move #${index} `
+
     return (
-      <li key={`history_${index}`}>
-        <button
-          disabled={isCurrentStep}
-          onClick={() => {
-            setCurrentStep(index)
-          }}
-        >
-          {text} {isCurrentStep ? '(current)' : null}
+      <li key={index}>
+        <button onClick={() => setCurrentStep(index)} disabled={isCurrentStep}>
+          {description}
+          {isCurrentStep ? '(current)' : null}
         </button>
       </li>
     )
@@ -85,11 +84,16 @@ function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board onClick={selectSquare} squares={currentSquares} />
+        <Board
+          onClick={selectSquare}
+          squares={currentSquares}
+          winner={winner}
+        />
         <button className="restart" onClick={restart}>
           restart
         </button>
       </div>
+
       <div className="game-info">
         <div>{status}</div>
         <ol>{moves}</ol>
@@ -98,6 +102,7 @@ function Game() {
   )
 }
 
+// eslint-disable-next-line no-unused-vars
 function calculateStatus(winner, squares, nextValue) {
   return winner
     ? `Winner: ${winner}`
@@ -106,10 +111,12 @@ function calculateStatus(winner, squares, nextValue) {
     : `Next player: ${nextValue}`
 }
 
+// eslint-disable-next-line no-unused-vars
 function calculateNextValue(squares) {
   return squares.filter(Boolean).length % 2 === 0 ? 'X' : 'O'
 }
 
+// eslint-disable-next-line no-unused-vars
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],

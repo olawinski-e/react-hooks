@@ -67,7 +67,7 @@ function Game() {
     setCurrentStep(0)
   }
 
-  const moves = history.map((stepSquares, step) => {
+  const moves = history.map((_, step) => {
     const desc = step ? `Go to move #${step}` : 'Go to game start'
     const isCurrentStep = step === currentStep
     return (
